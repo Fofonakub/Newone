@@ -46,11 +46,35 @@ Promise.all([
   ];
 
   // 1) วาด "รูป" ลงไปก่อน ให้เต็มช่องขาว
-  images.forEach((img, i) => {
-    if (!img) return;
-    const { x, y } = positions[i];
-    ctx.drawImage(img, x, y, slotW, slotH);
-  });
+images.forEach((img, i) => {
+  if (!img) return;
+  const { x, y } = positions[i];
+
+  const iw = img.width;
+  const ih = img.height;
+
+  const slotR = slotW / slotH;   // อัตราส่วนของช่อง
+  const imgR  = iw / ih;         // อัตราส่วนของรูปจริง
+
+  let sx, sy, sw, sh;
+
+  if (imgR > slotR) {
+    // รูป "กว้าง" กว่าช่อง → ตัดข้างซ้ายขวาออก
+    sh = ih;
+    sw = ih * slotR;
+    sx = (iw - sw) / 2;
+    sy = 0;
+  } else {
+    // รูป "สูง" กว่าช่อง → ตัดบนล่างออก
+    sw = iw;
+    sh = iw / slotR;
+    sx = 0;
+    sy = (ih - sh) / 2;
+  }
+
+  // วาดแบบ crop กลางภาพและ scale ให้พอดีช่อง
+  ctx.drawImage(img, sx, sy, sw, sh, x, y, slotW, slotH);
+});
 
   // 2) แล้วค่อยวาด "กรอบ" ทับด้านบนสุด
   if (frameImg) {
